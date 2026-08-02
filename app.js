@@ -745,11 +745,12 @@ function RolloverModal({ avgBench, avgSquat, lmSuggest, avgThreshold, avgEasy, c
                 React.createElement("button", { onClick: () => onApply(benchResult.rows, squatResult.rows, vdotPoints), className: "px-4 py-2 rounded-sm text-sm font-medium", style: { backgroundColor: '#c99a2e', color: '#14161a' } }, "Apply & Continue")))));
 }
 /* ---------- Settings Panel ---------- */
-function SettingsPanel({ settings, profile, tmHistory, onSave, onClose }) {
+function SettingsPanel({ settings, profile, tmHistory, onSave, onClose, onReset }) {
     const [s, setS] = useState(JSON.parse(JSON.stringify(settings)));
     const [p, setP] = useState(JSON.parse(JSON.stringify(profile)));
     const [tab, setTab] = useState('settings'); // 'settings' | 'progress'
     const [tmUnlocked, setTmUnlocked] = useState(false);
+    const [confirmReset, setConfirmReset] = useState(false);
     const labelStyle = { color: '#8b9078' };
     const fieldStyle = { backgroundColor: '#14161a', borderColor: '#2c2f26', color: '#e7e4d9' };
     const whiteFieldStyle = { backgroundColor: '#ffffff', borderColor: '#2c2f26', color: '#000000' };
@@ -783,7 +784,14 @@ function SettingsPanel({ settings, profile, tmHistory, onSave, onClose }) {
                             React.createElement("span", { className: "text-[10px]", style: { color: '#5a5f4c' } }, label),
                             React.createElement("input", { type: "number", value: p.tm[k], onChange: (e) => setP({ ...p, tm: { ...p.tm, [k]: Number(e.target.value) } }), className: "w-full rounded-sm px-2 py-1.5 font-mono border", style: whiteFieldStyle }))))),
                         React.createElement("span", { className: "text-[10px]", style: { color: '#5a5f4c' } }, "VDOT"),
-                        React.createElement("input", { type: "number", value: p.vdot ? Number(p.vdot.toFixed(1)) : '', onChange: (e) => setP({ ...p, vdot: Number(e.target.value) }), className: "w-full rounded-sm px-2 py-1.5 font-mono border", style: whiteFieldStyle })))))),
+                        React.createElement("input", { type: "number", value: p.vdot ? Number(p.vdot.toFixed(1)) : '', onChange: (e) => setP({ ...p, vdot: Number(e.target.value) }), className: "w-full rounded-sm px-2 py-1.5 font-mono border", style: whiteFieldStyle })))),
+                React.createElement("div", null,
+                    React.createElement("div", { className: "text-xs font-mono uppercase tracking-wide mb-1", style: { color: '#c76b52' } }, "Danger Zone"),
+                    !confirmReset ? (React.createElement("button", { onClick: () => setConfirmReset(true), className: "w-full px-3 py-2 rounded-sm text-xs font-mono uppercase tracking-wide border", style: { borderColor: '#a8402f66', color: '#c76b52' } }, "Reset This App's Data")) : (React.createElement("div", { className: "rounded-sm p-3 border", style: { borderColor: '#a8402f66', backgroundColor: '#a8402f14' } },
+                        React.createElement("p", { className: "text-xs mb-2", style: { color: '#e7e4d9' } }, "Erases your setup, session history, and training max on this device. Doesn't touch anything on your other installed apps, even if they share this same GitHub Pages domain. Can't be undone."),
+                        React.createElement("div", { className: "flex gap-2" },
+                            React.createElement("button", { onClick: () => setConfirmReset(false), className: "flex-1 px-3 py-2 rounded-sm text-xs font-mono", style: { color: '#8b9078' } }, "Cancel"),
+                            React.createElement("button", { onClick: onReset, className: "flex-1 px-3 py-2 rounded-sm text-xs font-mono", style: { backgroundColor: '#a8402f', color: '#e7e4d9' } }, "Confirm Reset"))))))),
             tab === 'settings' && (React.createElement("div", { className: "flex justify-end gap-2 mt-6" },
                 React.createElement("button", { onClick: onClose, className: "px-3 py-2 text-sm font-mono uppercase tracking-wide", style: { color: '#8b9078' } }, "Cancel"),
                 React.createElement("button", { onClick: () => onSave(s, p), className: "px-4 py-2 rounded-sm text-sm font-medium", style: { backgroundColor: '#c99a2e', color: '#14161a' } }, "Save"))))));
@@ -998,6 +1006,18 @@ function NovocaineApp() {
                 setTmHistory(nextTmHistory);
                 setShowSettings(false);
                 persist({ settings: s, profile: p, progress, history, tmHistory: nextTmHistory });
+            }, onReset: () => {
+                try {
+                    localStorage.removeItem(STORAGE_KEY);
+                }
+                catch (e) { /* ignore */ }
+                setSettings(DEFAULT_SETTINGS);
+                setProfile(DEFAULT_PROFILE);
+                setProgress(DEFAULT_PROGRESS);
+                setHistory([]);
+                setTmHistory([]);
+                setNeedsSetup(true);
+                setShowSettings(false);
             } })),
         rollover != null && (React.createElement(RolloverModal, { avgBench: rollover.avgBench, avgSquat: rollover.avgSquat, lmSuggest: rollover.lmSuggest, avgThreshold: rollover.avgThreshold, avgEasy: rollover.avgEasy, category: settings.category, currentTm: profile.tm, currentVdot: profile.vdot, onApply: applyRollover, onDismiss: () => setRollover(null) })),
         showTimer && timerPhases && (React.createElement(IntervalTimer, { title: BASE_INFO[currentBase].name, phases: timerPhases, onClose: () => setShowTimer(false) }))));

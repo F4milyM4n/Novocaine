@@ -64,6 +64,15 @@ All training data (setup, session history, training maxes) is stored in the brow
 That also means the data is per-browser/per-device; it won't sync between your phone and
 a laptop unless you manually recreate the same setup on both.
 
+**If you have more than one app hosted under the same GitHub Pages username**
+(`username.github.io/app-one`, `username.github.io/app-two`, etc.), they all share one
+browser storage origin — `username.github.io` — regardless of the path. Your browser's
+"Clear Site Data" / "Clear storage" acts on the whole origin, not a single app, so it
+will wipe every app under that username at once. There's no way around that at the
+browser level short of putting an app on its own domain. Inside Settings here, though,
+there's a **Reset This App's Data** control (under Danger Zone) that only clears this
+app's own storage key — safe to use even when another app shares the domain.
+
 ## Notes on this build
 
 Ported from the interactive Claude artifact. Same three swaps as before, no behavior

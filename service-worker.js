@@ -1,4 +1,4 @@
-const CACHE_NAME = 'novocaine-v2';
+const CACHE_NAME = 'novocaine-v3';
 const APP_SHELL = [
   './',
   './index.html',
